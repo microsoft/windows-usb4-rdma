@@ -1,0 +1,57 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License.
+
+#include <winver.h>
+
+// Release builds set these from the git tag (see Directory.Build.targets);
+// local builds use the defaults below.
+#ifndef ND_VER_MAJOR
+#define ND_VER_MAJOR 1
+#endif
+#ifndef ND_VER_MINOR
+#define ND_VER_MINOR 0
+#endif
+#ifndef ND_VER_PATCH
+#define ND_VER_PATCH 0
+#endif
+#ifndef ND_VER_BUILD
+#define ND_VER_BUILD 1
+#endif
+
+#define ND_VER_STRINGIZE2(x) #x
+#define ND_VER_STRINGIZE(x) ND_VER_STRINGIZE2(x)
+#define ND_VER_STRING ND_VER_STRINGIZE(ND_VER_MAJOR.ND_VER_MINOR.ND_VER_PATCH.ND_VER_BUILD)
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION ND_VER_MAJOR,ND_VER_MINOR,ND_VER_PATCH,ND_VER_BUILD
+ PRODUCTVERSION ND_VER_MAJOR,ND_VER_MINOR,ND_VER_PATCH,ND_VER_BUILD
+ FILEFLAGSMASK 0x3fL
+#ifdef DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE RC_FILE_TYPE
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "CompanyName", "Microsoft Corporation\0"
+            VALUE "FileDescription", RC_VERSION_FILE_DESCRIPTION
+            VALUE "InternalName", RC_VERSION_INTERNAL_NAME
+            VALUE "LegalCopyright", "\251 Microsoft Corporation. All rights reserved.\0"
+            VALUE "LegalTrademarks", "Microsoft\256 is a registered trademark of Microsoft Corporation.\0"
+            VALUE "OriginalFilename", RC_VERSION_ORIGINAL_FILE_NAME
+            VALUE "ProductName", "Microsoft NetworkDirect over USB4\0"
+            VALUE "FileVersion", ND_VER_STRING
+            VALUE "ProductVersion", ND_VER_STRING
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
