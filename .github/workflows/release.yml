@@ -20,7 +20,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
       - name: Determine version
         id: version
@@ -47,9 +47,9 @@ jobs:
           "prerelease=$($prerelease.ToString().ToLower())" >> $env:GITHUB_OUTPUT
           Write-Host "Version $label (file version $fileVersion, prerelease: $prerelease)"
 
-      - uses: microsoft/setup-msbuild@v2
+      - uses: microsoft/setup-msbuild@6fb02220983dee41ce7ae257b6f4d8f9bf5ed4ce # v2
 
-      - uses: nuget/setup-nuget@v2
+      - uses: nuget/setup-nuget@d105a947828025cd7a980103c35ba2bfae586d0f # v2
 
       - name: Restore NuGet packages
         run: nuget restore src\netdirect.sln -PackagesDirectory packages
@@ -67,7 +67,7 @@ jobs:
           -Version ${{ steps.version.outputs.label }}
           -FileVersion ${{ steps.version.outputs.file_version }}
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: windows-usb4-rdma-${{ steps.version.outputs.label }}-x64
           path: artifacts/*
