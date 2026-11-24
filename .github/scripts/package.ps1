@@ -5,7 +5,8 @@
 .DESCRIPTION
     Run after building src\netdirect.sln. The file list comes from the projects in
     the source tree, not from the contents of out\, so stale outputs are never
-    packaged. Package layout:
+    packaged. The checksums go to SHA256SUMS-<Platform>.txt; the release workflow
+    merges the per-platform files into SHA256SUMS.txt. Package layout:
 
         <name>\ndprov.dll, ndprov_install.exe, README.md, LICENSE.txt
         <name>\tools\<example>.exe
@@ -97,7 +98,7 @@ Compress-Archive -Path $symRoot -DestinationPath (Join-Path $outDir "$name-symbo
 $sums = Get-ChildItem $outDir -Filter *.zip | Sort-Object Name | ForEach-Object {
     '{0}  {1}' -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name
 }
-Set-Content (Join-Path $outDir 'SHA256SUMS.txt') $sums -Encoding ascii
+Set-Content (Join-Path $outDir "SHA256SUMS-$Platform.txt") $sums -Encoding ascii
 
 Remove-Item $stage -Recurse -Force
 Get-ChildItem $outDir | Format-Table Name, Length -AutoSize | Out-String | Write-Host

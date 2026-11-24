@@ -16,9 +16,14 @@ permissions:
 
 jobs:
   build:
+    name: build (${{ matrix.platform }})
     runs-on: windows-2025
-    permissions:
-      contents: write
+    outputs:
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: [x64, ARM64]
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
 
@@ -57,7 +62,7 @@ jobs:
       - name: Build
         run: >
           msbuild src\netdirect.sln /m /nologo /v:minimal
-          /p:Configuration=Release /p:Platform=x64
+          /p:Configuration=Release /p:Platform=${{ matrix.platform }}
           /p:NdVersion=${{ steps.version.outputs.file_version }}
 
       - name: Package
@@ -66,21 +71,39 @@ jobs:
           .github\scripts\package.ps1
           -Version ${{ steps.version.outputs.label }}
           -FileVersion ${{ steps.version.outputs.file_version }}
+          -Platform ${{ matrix.platform }}
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: windows-usb4-rdma-${{ steps.version.outputs.label }}-x64
+          name: windows-usb4-rdma-${{ steps.version.outputs.label }}-${{ matrix.platform }}
           path: artifacts/*
           if-no-files-found: error
 
+  release:
+    if: github.ref_type == 'tag'
+    needs: build
+    runs-on: windows-2025
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
+        with:
+          path: artifacts
+          merge-multiple: true
+
       - name: Publish GitHub release
-        if: github.ref_type == 'tag'
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           TAG: ${{ github.ref_name }}
-          PRERELEASE: ${{ steps.version.outputs.prerelease }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
         run: |
+          # Replace the per-platform checksum files with one covering every archive.
+          $sums = Get-ChildItem artifacts -Filter 'SHA256SUMS-*.txt' | Sort-Object Name | Get-Content
+          Remove-Item artifacts\SHA256SUMS-*.txt
+          Set-Content artifacts\SHA256SUMS.txt $sums -Encoding ascii
+
           $files = Get-ChildItem artifacts -File | ForEach-Object FullName
           gh release view $env:TAG *> $null
           if ($LASTEXITCODE -eq 0) {

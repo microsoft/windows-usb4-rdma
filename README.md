@@ -18,7 +18,7 @@ The project provides `ndprov.dll`, a NetworkDirect v2 (NDv2) provider that runs 
 
 ## Prerequisites
 
-- [Visual Studio 2022](https://visualstudio.microsoft.com/downloads/) with the **Desktop development with C++** workload.
+- [Visual Studio 2026](https://visualstudio.microsoft.com/downloads/) with the **Desktop development with C++** workload.
 - Windows SDK 10.0.26100 or later.
 - The [NuGet CLI](https://learn.microsoft.com/nuget/install-nuget-client-tools), to restore packages from the command line.
 
@@ -36,17 +36,20 @@ Then build from a **Developer Command Prompt for Visual Studio**:
 msbuild src\netdirect.sln /m /p:Configuration=Release /p:Platform=x64
 ```
 
+For Windows on ARM, use `/p:Platform=ARM64` instead. The ARM64 build cross-compiles from an x64 machine and needs the **MSVC Build Tools for ARM64/ARM64EC (Latest)** component.
+
 Binaries are written to `out\<Configuration>-<Platform>\<project>\`.
 
 To stamp a version into the binaries, add `/p:NdVersion=<major>.<minor>.<patch>.<build>`. Without it, the binaries report version 1.0.0.1.
 
 ## Releases
 
-Pushing a tag of the form `vMAJOR.MINOR.PATCH` (for example `v1.2.0`) runs the [Release workflow](.github/workflows/release.yml). It builds Release x64 and publishes a GitHub release containing:
+Pushing a tag of the form `vMAJOR.MINOR.PATCH` (for example `v1.2.0`) runs the [Release workflow](.github/workflows/release.yml). It builds Release x64 and ARM64 and publishes a GitHub release containing, for each platform (`x64` and `ARM64`):
 
-- `windows-usb4-rdma-<version>-x64.zip`: `ndprov.dll`, `ndprov_install.exe`, the tools in `tools\`, and the tests in `tests\`.
-- `windows-usb4-rdma-<version>-x64-symbols.zip`: the matching `.pdb` files.
-- `SHA256SUMS.txt`: checksums for both archives.
+- `windows-usb4-rdma-<version>-<platform>.zip`: `ndprov.dll`, `ndprov_install.exe`, the tools in `tools\`, and the tests in `tests\`.
+- `windows-usb4-rdma-<version>-<platform>-symbols.zip`: the matching `.pdb` files.
+
+The release also contains `SHA256SUMS.txt`, with checksums for all archives.
 
 A tag with a suffix, such as `v1.2.0-rc.1`, creates a prerelease. You can also run the workflow manually from the Actions tab; this uploads the archives as workflow artifacts without creating a release.
 
